@@ -11,7 +11,7 @@
 
 ## 🌍 Live Demo
 
-**[→ View Live on Netlify](https://echoes-interactive.netlify.app)**
+**[→ View Live on GitHub](https://minajuddin0510.github.io/echoes-interactive/)**
 
 ---
 
