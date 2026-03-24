@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ECHOES — A Journey Through Humanity's Greatest Moments</title>
+<link rel="icon" type="image/png" href="favicon.png"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="ECHOES — A Journey Through Humanity's Greatest Moments"/>
+<meta property="og:description" content="Five moments. Five decisions. Each one an echo that still shapes the world you live in today."/>
+<meta property="og:image" content="og-image.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="ECHOES — A Journey Through Humanity's Greatest Moments"/>
+<meta name="twitter:description" content="Five moments. Five decisions. Each one an echo that still shapes the world you live in today."/>
+<meta name="twitter:image" content="og-image.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Lora:ital,wght@0,400;0,500;1,400&family=Josefin+Sans:wght@100;200;300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+/* ── TOKENS ── */
+:root {
+  --ink:       #f0ece4;
+  --ink2:      #d4cfc6;
+  --ink3:      #9a9286;
+  --paper:     #0f0d0b;
+  --paper2:    #181512;
+  --paper3:    #231f1b;
+  --warm:      #e8903a;
+  --warm2:     #c4711e;
+  --warm-dim:  rgba(232,144,58,0.12);
+  --line:      rgba(240,236,228,0.08);
+  --line2:     rgba(240,236,228,0.04);
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Lora', serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── CUSTOM CURSOR ── */
+#cursor {
+  width: 10px; height: 10px;
+  background: var(--ink);
+  border-radius: 50%;
+  position: fixed; pointer-events: none; z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width .25s, height .25s, background .25s, border-radius .25s;
+}
+#cursor-ring {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(240,236,228,0.25);
+  border-radius: 50%;
+  position: fixed; pointer-events: none; z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: all .12s ease-out;
+}
+.hoverable:hover ~ #cursor,
+a:hover ~ #cursor,
+button:hover ~ #cursor { width: 6px; height: 6px; background: var(--warm); }
+
+/* ── LOADER ── */
+#loader {
+  position: fixed; inset: 0;
+  background: #070503;
+  z-index: 10000;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 32px;
+}
+.loader-word {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 8vw, 6rem);
+  font-weight: 900; font-style: italic;
+  color: var(--ink);
+  letter-spacing: -1px;
+  opacity: 0;
+  animation: loaderFade 2.8s ease forwards;
+}
+.loader-line-wrap {
+  width: 120px; height: 1px;
+  background: rgba(240,236,228,0.1); overflow: hidden;
+}
+.loader-line-fill {
+  height: 100%; background: var(--warm);
+  animation: loaderBar 2.6s ease forwards;
+}
+.loader-sub {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 10px; font-weight: 200;
+  letter-spacing: 8px; color: rgba(240,236,228,0.35);
+  animation: loaderFade 2.8s ease .3s forwards; opacity: 0;
+}
+@keyframes loaderFade { 0%{opacity:0;transform:translateY(12px)} 30%{opacity:1;transform:none} 85%{opacity:1} 100%{opacity:0} }
+@keyframes loaderBar { from{width:0} to{width:100%} }
+
+/* ── PROGRESS BAR ── */
+#progress {
+  position: fixed; top: 0; left: 0;
+  height: 2px; width: 0%;
+  background: var(--warm);
+  z-index: 201; transition: width .08s;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  padding: 28px 56px;
+  display: flex; justify-content: space-between; align-items: center;
+  opacity: 0;
+}
+.nav-logo {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 11px; font-weight: 300; letter-spacing: 8px;
+  color: var(--ink3); text-transform: uppercase;
+}
+.nav-chapters {
+  display: flex; gap: 40px; list-style: none;
+}
+.nav-chapters a {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px; font-weight: 200; letter-spacing: 4px;
+  color: var(--ink3); text-decoration: none;
+  text-transform: uppercase; transition: color .3s;
+}
+.nav-chapters a:hover { color: var(--warm); }
+.chapter-indicator {
+  position: fixed; right: 40px; top: 50%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 12px;
+  z-index: 200; opacity: 0;
+}
+.chap-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--paper3); cursor: pointer;
+  transition: all .3s; position: relative;
+}
+.chap-dot.active { background: var(--warm); transform: scale(1.6); }
+.chap-dot:hover { background: var(--ink3); }
+
+/* ── SECTIONS ── */
+section {
+  position: relative; z-index: 10;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+/* ══ S1 — HERO ══ */
+#hero {
+  flex-direction: column;
+  text-align: center;
+  padding: 0 24px;
+  background: var(--paper);
+}
+.hero-rule {
+  width: 1px; height: 80px;
+  background: linear-gradient(to bottom, transparent, var(--ink3));
+  margin: 0 auto 48px; opacity: 0;
+}
+.hero-eyebrow {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 10px; font-weight: 200; letter-spacing: 10px;
+  color: var(--warm); text-transform: uppercase;
+  margin-bottom: 28px; opacity: 0;
+}
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(5rem, 16vw, 14rem);
+  font-weight: 900; font-style: italic;
+  line-height: .88; letter-spacing: -3px;
+  color: var(--ink); margin-bottom: 32px; opacity: 0;
+}
+.hero-subtitle {
+  font-family: 'Lora', serif;
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  font-weight: 400; font-style: italic;
+  color: var(--ink3); line-height: 1.9;
+  max-width: 480px; margin: 0 auto 56px; opacity: 0;
+}
+.hero-scroll {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 12px; opacity: 0;
+}
+.hero-scroll span {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px; font-weight: 200; letter-spacing: 6px;
+  color: var(--ink3); text-transform: uppercase;
+}
+.scroll-bar {
+  width: 1px; height: 64px;
+  background: linear-gradient(to bottom, var(--ink3), transparent);
+  animation: scrollAnim 2s ease-in-out infinite;
+}
+@keyframes scrollAnim { 0%,100%{opacity:1;transform:scaleY(1)} 50%{opacity:.3;transform:scaleY(.5)} }
+
+/* Chapter number watermark */
+.chap-num {
+  position: absolute;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(12rem, 30vw, 26rem);
+  font-weight: 900; font-style: italic;
+  color: rgba(20,18,16,0.04);
+  line-height: 1; pointer-events: none;
+  user-select: none; z-index: 0;
+  white-space: nowrap;
+}
+
+/* ══ CHAPTER SECTIONS ══ */
+.chap-section {
+  padding: 140px 10vw;
+  border-top: 1px solid var(--line);
+  flex-direction: column;
+  align-items: flex-start;
+}
+.chap-section.right { align-items: flex-end; text-align: right; }
+.chap-section.center { align-items: center; text-align: center; }
+
+.chap-tag {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px; font-weight: 200; letter-spacing: 8px;
+  color: var(--warm); text-transform: uppercase;
+  margin-bottom: 32px; display: flex; align-items: center; gap: 16px;
+}
+.chap-tag .tag-line {
+  display: block; width: 32px; height: 1px; background: var(--warm);
+}
+.chap-section.right .chap-tag { flex-direction: row-reverse; }
+.chap-section.center .chap-tag { justify-content: center; }
+
+.chap-date {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3.5rem, 8vw, 7rem);
+  font-weight: 900; line-height: .9;
+  color: var(--ink); margin-bottom: 12px;
+  letter-spacing: -2px;
+}
+.chap-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 400; font-style: italic;
+  color: var(--ink3); margin-bottom: 48px;
+  line-height: 1.1;
+}
+.chap-body {
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 2; color: var(--ink2);
+  max-width: 560px; font-weight: 400;
+}
+.chap-body em { color: var(--warm); font-style: normal; font-weight: 500; }
+.chap-pull {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-style: italic; font-weight: 400;
+  color: var(--ink); line-height: 1.5;
+  border-left: 2px solid var(--warm);
+  padding-left: 28px;
+  max-width: 520px;
+  margin: 48px 0;
+}
+.chap-section.right .chap-pull {
+  border-left: none;
+  border-right: 2px solid var(--warm);
+  padding-left: 0; padding-right: 28px;
+}
+
+/* Visual accent elements */
+.accent-circle {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(240,236,228,0.06);
+  pointer-events: none;
+}
+.accent-dot {
+  position: absolute;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--warm);
+  pointer-events: none;
+}
+
+/* Divider */
+.chap-divider {
+  width: 48px; height: 1px;
+  background: var(--warm);
+  margin: 48px 0;
+}
+.chap-section.right .chap-divider { margin-left: auto; }
+.chap-section.center .chap-divider { margin: 48px auto; }
+
+/* Stat highlight */
+.stat-row {
+  display: flex; gap: 48px; margin-top: 48px;
+  flex-wrap: wrap;
+}
+.chap-section.right .stat-row { justify-content: flex-end; }
+.chap-section.center .stat-row { justify-content: center; }
+.stat-item { display: flex; flex-direction: column; }
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem; font-weight: 700;
+  color: var(--ink); line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-label {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px; font-weight: 200; letter-spacing: 4px;
+  color: var(--ink3); text-transform: uppercase;
+}
+
+/* ══ INTERACTIVE FINALE ══ */
+#finale {
+  flex-direction: column;
+  padding: 140px 10vw;
+  background: #0a0806;
+  color: var(--paper);
+  border-top: 1px solid rgba(232,144,58,0.15);
+  align-items: center;
+  text-align: center;
+}
+#finale .chap-tag { color: var(--warm); }
+#finale .chap-tag .tag-line { background: var(--warm); }
+#finale .chap-date { color: var(--ink); }
+#finale .chap-title { color: var(--ink3); }
+#finale .chap-body { color: var(--ink2); max-width: 560px; margin: 0 auto; }
+#finale .chap-divider { background: rgba(232,144,58,0.3); margin: 48px auto; }
+
+.echo-input-wrap {
+  width: 100%; max-width: 600px;
+  margin: 48px auto 0;
+  position: relative;
+}
+.echo-label {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 10px; font-weight: 200; letter-spacing: 6px;
+  color: var(--ink3); text-transform: uppercase;
+  margin-bottom: 16px; display: block;
+}
+.echo-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(240,236,228,0.15);
+  padding: 16px 0;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+  font-style: italic;
+  color: var(--ink);
+  outline: none;
+  caret-color: var(--warm);
+  transition: border-color .3s;
+  text-align: center;
+}
+.echo-input::placeholder { color: rgba(240,236,228,0.2); }
+.echo-input:focus { border-bottom-color: var(--warm); }
+.echo-btn {
+  margin-top: 32px;
+  background: transparent;
+  border: 1px solid rgba(240,236,228,0.2);
+  color: var(--ink2);
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 10px; font-weight: 200; letter-spacing: 6px;
+  text-transform: uppercase;
+  padding: 16px 40px; cursor: pointer;
+  transition: all .3s; position: relative; overflow: hidden;
+}
+.echo-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--warm);
+  transform: translateX(-101%);
+  transition: transform .35s ease; z-index: -1;
+}
+.echo-btn:hover { border-color: var(--warm); color: var(--ink); }
+.echo-btn:hover::before { transform: translateX(0); }
+
+/* Echo Wall */
+.echo-wall {
+  width: 100%; max-width: 700px;
+  margin-top: 64px;
+  display: flex; flex-direction: column; gap: 0;
+}
+.echo-wall-title {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px; font-weight: 200; letter-spacing: 6px;
+  color: var(--ink3); text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.echo-entry {
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(240,236,228,0.07);
+  display: flex; gap: 20px; align-items: baseline;
+  animation: echoIn .6s ease forwards;
+  opacity: 0; text-align: left;
+}
+@keyframes echoIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+.echo-entry-num {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px; font-weight: 200; letter-spacing: 2px;
+  color: var(--warm); flex-shrink: 0; min-width: 28px;
+}
+.echo-entry-text {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  font-style: italic; color: var(--ink2);
+  line-height: 1.5;
+}
+
+/* ── FOOTER ── */
+footer {
+  position: relative; z-index: 10;
+  background: #0a0806;
+  padding: 32px 56px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px;
+  border-top: 1px solid rgba(240,236,228,0.06);
+}
+footer span {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 9px; font-weight: 200; letter-spacing: 4px;
+  color: rgba(240,236,228,0.25); text-transform: uppercase;
+}
+
+/* ── REVEAL CLASSES ── */
+.r  { opacity: 0; transform: translateY(32px); }
+.rl { opacity: 0; transform: translateX(-32px); }
+.rr { opacity: 0; transform: translateX(32px); }
+.rf { opacity: 0; }
+
+/* ── HORIZONTAL RULE DECORATION ── */
+.page-rule {
+  position: absolute; bottom: 0; left: 10vw; right: 10vw;
+  height: 1px; background: var(--line2); pointer-events: none;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  nav { padding: 20px 24px; }
+  .nav-chapters { display: none; }
+  .chapter-indicator { display: none; }
+  .chap-section { padding: 80px 24px; }
+  .chap-section.right { align-items: flex-start; text-align: left; }
+  .chap-section.right .chap-pull { border-left: 2px solid var(--warm); border-right: none; padding-left: 28px; padding-right: 0; }
+  .chap-section.right .chap-tag { flex-direction: row; }
+  .chap-section.right .chap-divider { margin-left: 0; }
+  .stat-row { gap: 28px; }
+  footer { padding: 24px; }
+  #finale { padding: 80px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- Progress -->
+<div id="progress"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-word">Echoes</div>
+  <div class="loader-line-wrap"><div class="loader-line-fill"></div></div>
+  <div class="loader-sub">A journey through humanity</div>
+</div>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <div class="nav-logo">Echoes</div>
+  <ul class="nav-chapters">
+    <li><a href="#fire">I. Fire</a></li>
+    <li><a href="#language">II. Language</a></li>
+    <li><a href="#cities">III. Cities</a></li>
+    <li><a href="#print">IV. Print</a></li>
+    <li><a href="#finale">V. Now</a></li>
+  </ul>
+</nav>
+
+<!-- Chapter Dots -->
+<div class="chapter-indicator" id="chap-indicator">
+  <div class="chap-dot active" data-target="#fire"></div>
+  <div class="chap-dot" data-target="#language"></div>
+  <div class="chap-dot" data-target="#cities"></div>
+  <div class="chap-dot" data-target="#print"></div>
+  <div class="chap-dot" data-target="#finale"></div>
+</div>
+
+
+<!-- ════════════════════════════════
+     HERO
+════════════════════════════════ -->
+<section id="hero">
+  <div class="chap-num" style="bottom:-8%;left:-2%;opacity:.035">E</div>
+
+  <div class="hero-rule"></div>
+  <p class="hero-eyebrow">A journey through humanity's greatest moments</p>
+  <h1 class="hero-title">Echoes</h1>
+  <p class="hero-subtitle">Five moments. Five decisions. Each one an echo that still shapes the world you live in today.</p>
+  <div class="hero-scroll">
+    <span>Begin</span>
+    <div class="scroll-bar"></div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     CH.1 — FIRE
+════════════════════════════════ -->
+<section id="fire" class="chap-section">
+  <div class="chap-num" style="top:-5%;right:-4%">I</div>
+
+  <!-- Accent shapes -->
+  <div class="accent-circle" style="width:320px;height:320px;top:10%;right:8%;opacity:.4;"></div>
+  <div class="accent-circle" style="width:160px;height:160px;top:15%;right:12%;opacity:.3;"></div>
+  <div class="accent-dot" style="top:18%;right:18%;"></div>
+
+  <p class="chap-tag r"><span class="tag-line"></span>Chapter One</p>
+  <div class="chap-date r">2,000,000 BC</div>
+  <div class="chap-title r">The Gift of Fire</div>
+  <div class="chap-divider r"></div>
+
+  <p class="chap-body r">
+    Before fire, the night was death. Every creature on earth feared the dark — except, one day, us.<br/><br/>
+    When <em>Homo erectus</em> first learned to control flame, something irreversible happened. We didn't just gain warmth. We gained time. Firelit evenings meant hours freed from survival — hours that became <em>stories, songs, rituals, and memory.</em><br/><br/>
+    Fire cooked our food, which shrank our guts and grew our brains. It gathered our tribes into circles. It drew the first line between <em>us and everything else</em> on this planet.
+  </p>
+
+  <blockquote class="chap-pull r">
+    "The campfire was humanity's first classroom, first theatre, first parliament."
+  </blockquote>
+
+  <div class="stat-row">
+    <div class="stat-item r">
+      <div class="stat-num">2M</div>
+      <div class="stat-label">Years of fire use</div>
+    </div>
+    <div class="stat-item r">
+      <div class="stat-num">+30%</div>
+      <div class="stat-label">Brain size increase</div>
+    </div>
+    <div class="stat-item r">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">Stories told since</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     CH.2 — LANGUAGE
+════════════════════════════════ -->
+<section id="language" class="chap-section right">
+  <div class="chap-num" style="top:-5%;left:-2%">II</div>
+
+  <div class="accent-circle" style="width:400px;height:400px;bottom:5%;left:5%;opacity:.3;"></div>
+  <div class="accent-dot" style="bottom:22%;left:15%;"></div>
+
+  <p class="chap-tag r"><span class="tag-line"></span>Chapter Two</p>
+  <div class="chap-date r">70,000 BC</div>
+  <div class="chap-title r">The Cognitive Revolution</div>
+  <div class="chap-divider r"></div>
+
+  <p class="chap-body r">
+    Something changed in the human brain around 70,000 years ago. We call it the <em>Cognitive Revolution.</em> Suddenly, humans began speaking in a new way — not just "lion by the river" but "the lion that guards the river in our ancestors' dreams."<br/><br/>
+    We invented <em>fiction</em>. We could speak of things that didn't exist. Of gods, nations, laws, money — shared stories that millions of strangers could believe together.<br/><br/>
+    A chimpanzee cannot be convinced to give up a banana now in exchange for one in heaven. <em>We can.</em> That gap is language. That gap is everything.
+  </p>
+
+  <blockquote class="chap-pull r">
+    "Language didn't help us describe the world. It helped us <em>invent</em> it."
+  </blockquote>
+
+  <div class="stat-row">
+    <div class="stat-item r">
+      <div class="stat-num">7,100</div>
+      <div class="stat-label">Languages spoken today</div>
+    </div>
+    <div class="stat-item r">
+      <div class="stat-num">70K</div>
+      <div class="stat-label">Years of storytelling</div>
+    </div>
+    <div class="stat-item r">
+      <div class="stat-num">1</div>
+      <div class="stat-label">Species that writes poetry</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     CH.3 — CITIES
+════════════════════════════════ -->
+<section id="cities" class="chap-section">
+  <div class="chap-num" style="top:-5%;right:-2%">III</div>
+
+  <div class="accent-circle" style="width:280px;height:280px;top:12%;right:10%;opacity:.35;"></div>
+  <div class="accent-circle" style="width:500px;height:500px;top:5%;right:4%;opacity:.15;"></div>
+
+  <p class="chap-tag r"><span class="tag-line"></span>Chapter Three</p>
+  <div class="chap-date r">3,500 BC</div>
+  <div class="chap-title r">The First Cities</div>
+  <div class="chap-divider r"></div>
+
+  <p class="chap-body r">
+    For 290,000 years, humans lived in groups of 150. That was the limit — the number of people one mind could truly know and trust.<br/><br/>
+    Then came <em>Uruk</em>. Then <em>Mesopotamia</em>. Then the radical, dangerous, beautiful experiment of putting <em>50,000 strangers</em> in one place and asking them to cooperate.<br/><br/>
+    Cities invented writing — not for poetry, but for <em>receipts</em>. They invented law, money, taxation, architecture, and bureaucracy. Every problem of modern life was born in a city. So was every solution.
+  </p>
+
+  <blockquote class="chap-pull r">
+    "The city is the greatest invention in human history. It forced strangers to become neighbours, and neighbours to become civilization."
+  </blockquote>
+
+  <div class="stat-row">
+    <div class="stat-item r">
+      <div class="stat-num">5,500</div>
+      <div class="stat-label">Years since Uruk</div>
+    </div>
+    <div class="stat-item r">
+      <div class="stat-num">56%</div>
+      <div class="stat-label">Humans in cities today</div>
+    </div>
+    <div class="stat-item r">
+      <div class="stat-num">4,500+</div>
+      <div class="stat-label">Cities with 100k+ people</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     CH.4 — PRINT
+════════════════════════════════ -->
+<section id="print" class="chap-section right">
+  <div class="chap-num" style="top:-5%;left:-1%">IV</div>
+
+  <div class="accent-circle" style="width:360px;height:360px;bottom:8%;left:6%;opacity:.3;"></div>
+  <div class="accent-dot" style="bottom:28%;left:20%;"></div>
+  <div class="accent-dot" style="bottom:32%;left:24%;background:var(--ink3);width:4px;height:4px;"></div>
+
+  <p class="chap-tag r"><span class="tag-line"></span>Chapter Four</p>
+  <div class="chap-date r">1440 AD</div>
+  <div class="chap-title r">The Press & The People</div>
+  <div class="chap-divider r"></div>
+
+  <p class="chap-body r">
+    Before Gutenberg, knowledge belonged to whoever could afford a scribe. A single Bible took a monk <em>two years</em> to copy by hand. Ideas moved at the speed of horses.<br/><br/>
+    The printing press didn't just change how fast information spread. It changed <em>who owned it.</em> Within 50 years, over 20 million books circulated Europe. The Reformation, the Scientific Revolution, the Enlightenment — all were made possible by a metal press and movable type.<br/><br/>
+    For the first time in history, a single idea could reach <em>one million minds</em> before a king could stop it.
+  </p>
+
+  <blockquote class="chap-pull r">
+    "The printing press was the internet of 1440. It broke every institution that relied on controlling information."
+  </blockquote>
+
+  <div class="stat-row">
+    <div class="stat-item r">
+      <div class="stat-num">20M</div>
+      <div class="stat-label">Books in 50 years</div>
+    </div>
+    <div class="stat-item r">
+      <div class="stat-num">50yrs</div>
+      <div class="stat-label">To spark Reformation</div>
+    </div>
+    <div class="stat-item r">
+      <div class="stat-num">130M</div>
+      <div class="stat-label">Books ever published</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════
+     CH.5 — FINALE (Interactive)
+════════════════════════════════ -->
+<section id="finale">
+  <div class="chap-num" style="top:-5%;right:-2%;color:rgba(247,244,239,0.03)">V</div>
+
+  <p class="chap-tag r" style="color:var(--warm)"><span class="tag-line"></span>Chapter Five</p>
+  <div class="chap-date r">Now</div>
+  <div class="chap-title r" style="color:rgba(247,244,239,0.4)">What Echo Will You Leave?</div>
+  <div class="chap-divider r"></div>
+
+  <p class="chap-body r">
+    Every person who ever made a fire, told a story, built a wall, or printed a page — they left an echo. Most didn't know it. Most never would.<br/><br/>
+    The chain from that first flame to you, right now, reading these words on a glowing screen — is unbroken. Billions of small decisions, accumulated over two million years, made you possible.<br/><br/>
+    The question is never <em>"does my life matter?"</em><br/>
+    The question is: <em>what will your echo sound like?</em>
+  </p>
+
+  <!-- Interactive input -->
+  <div class="echo-input-wrap r">
+    <label class="echo-label" for="echo-text">Write your echo — one sentence for the future</label>
+    <input
+      class="echo-input"
+      id="echo-text"
+      type="text"
+      placeholder="I will…"
+      maxlength="120"
+      autocomplete="off"
+    />
+    <br/>
+    <button class="echo-btn" id="echo-submit">Leave Your Echo</button>
+  </div>
+
+  <!-- Echo wall -->
+  <div class="echo-wall" id="echo-wall">
+    <div class="echo-wall-title" id="echo-wall-title" style="display:none">Echoes left by those who came before you</div>
+    <div id="echo-list"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>© Echoes — Human Stories</span>
+  <span>Frontend Odyssey Hackathon</span>
+  <span>Five moments. One unbroken chain.</span>
+</footer>
+
+
+<script>
+// ── CURSOR ──────────────────────────────────
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cur.style.left = mx + 'px';
+  cur.style.top  = my + 'px';
+});
+setInterval(() => {
+  rx += (mx - rx) * .14; ry += (my - ry) * .14;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+}, 16);
+document.querySelectorAll('a, button, .chap-dot, .echo-input').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cur.style.width = '5px'; cur.style.height = '5px';
+    cur.style.background = 'var(--warm)';
+    ring.style.width = '52px'; ring.style.height = '52px';
+  });
+  el.addEventListener('mouseleave', () => {
+    cur.style.width = '10px'; cur.style.height = '10px';
+    cur.style.background = 'var(--ink)';
+    ring.style.width = '36px'; ring.style.height = '36px';
+  });
+});
+
+// ── LOADER ──────────────────────────────────
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    gsap.to('#loader', {
+      opacity: 0, duration: .7,
+      onComplete: () => {
+        document.getElementById('loader').style.display = 'none';
+        initGSAP();
+      }
+    });
+  }, 3000);
+});
+
+// ── GSAP ────────────────────────────────────
+function initGSAP() {
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Nav
+  gsap.to('#main-nav', { opacity: 1, duration: .8, delay: .2 });
+  gsap.to('#chap-indicator', { opacity: 1, duration: .8, delay: .4 });
+
+  // Progress bar
+  gsap.to('#progress', {
+    width: '100%', ease: 'none',
+    scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: true }
+  });
+
+  // Hero stagger
+  const heroItems = ['.hero-rule', '.hero-eyebrow', '.hero-title', '.hero-subtitle', '.hero-scroll'];
+  heroItems.forEach((sel, i) => {
+    gsap.to(sel, { opacity: 1, y: 0, duration: 1.1, delay: .2 + i * .18, ease: 'power3.out' });
+  });
+
+  // Hero parallax on scroll
+  gsap.to('.hero-title', {
+    scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true },
+    y: -80, opacity: 0
+  });
+  gsap.to('.hero-subtitle', {
+    scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true },
+    y: -40, opacity: 0
+  });
+
+  // Generic scroll reveals — stagger siblings
+  document.querySelectorAll('section').forEach(sec => {
+    sec.querySelectorAll('.r, .rl, .rr, .rf').forEach((el, i) => {
+      gsap.to(el, {
+        scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' },
+        opacity: 1, y: 0, x: 0,
+        duration: .9,
+        delay: i * .08,
+        ease: 'power3.out'
+      });
+    });
+  });
+
+  // Chapter number parallax
+  document.querySelectorAll('.chap-num').forEach(el => {
+    gsap.to(el, {
+      scrollTrigger: { trigger: el.closest('section'), start: 'top bottom', end: 'bottom top', scrub: true },
+      y: -60
+    });
+  });
+
+  // Accent circles parallax
+  document.querySelectorAll('.accent-circle').forEach((el, i) => {
+    gsap.to(el, {
+      scrollTrigger: { trigger: el.closest('section'), start: 'top bottom', end: 'bottom top', scrub: true },
+      y: (i % 2 === 0 ? -40 : 40),
+      rotate: (i % 2 === 0 ? 8 : -8)
+    });
+  });
+
+  // Active chapter dot tracking
+  const sections = ['#fire','#language','#cities','#print','#finale'];
+  const dots = document.querySelectorAll('.chap-dot');
+  sections.forEach((id, i) => {
+    ScrollTrigger.create({
+      trigger: id,
+      start: 'top 55%',
+      end: 'bottom 55%',
+      onEnter: () => setActiveDot(i),
+      onEnterBack: () => setActiveDot(i)
+    });
+  });
+}
+
+function setActiveDot(i) {
+  document.querySelectorAll('.chap-dot').forEach((d, j) => {
+    d.classList.toggle('active', i === j);
+  });
+}
+
+// Chapter dot click navigation
+document.querySelectorAll('.chap-dot').forEach(dot => {
+  dot.addEventListener('click', () => {
+    document.querySelector(dot.dataset.target).scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+// ── ECHO WALL ───────────────────────────────
+const echoList = document.getElementById('echo-list');
+const echoWallTitle = document.getElementById('echo-wall-title');
+const echoInput = document.getElementById('echo-text');
+const echoBtn = document.getElementById('echo-submit');
+
+// Seed echoes for atmosphere
+const seedEchoes = [
+  'I will teach my daughter that curiosity is the most human thing of all.',
+  'I will build something that outlasts me.',
+  'I will listen more than I speak.',
+  'I will remember that every stranger carries a world inside them.',
+  'I will not waste the years I was given.'
+];
+
+let echoCount = 0;
+let seeded = false;
+
+function addEcho(text, prepend = false) {
+  echoCount++;
+  echoWallTitle.style.display = 'block';
+  const div = document.createElement('div');
+  div.className = 'echo-entry';
+  const numSpan = document.createElement('span');
+  numSpan.className = 'echo-entry-num';
+  numSpan.textContent = String(echoCount).padStart(2, '0');
+  const txtSpan = document.createElement('span');
+  txtSpan.className = 'echo-entry-text';
+  txtSpan.textContent = text;
+  div.appendChild(numSpan);
+  div.appendChild(txtSpan);
+  if (prepend) {
+    echoList.insertBefore(div, echoList.firstChild);
+  } else {
+    echoList.appendChild(div);
+  }
+}
+
+echoBtn.addEventListener('click', () => {
+  const val = echoInput.value.trim();
+  if (!val) return;
+
+  // Seed some on first real submission for social proof
+  if (!seeded) {
+    seeded = true;
+    seedEchoes.forEach(e => addEcho(e));
+  }
+
+  addEcho(val, true);
+  echoInput.value = '';
+  echoBtn.textContent = 'Echo left ✦';
+  echoBtn.style.borderColor = 'var(--warm)';
+  setTimeout(() => {
+    echoBtn.textContent = 'Leave Another Echo';
+    echoBtn.style.borderColor = '';
+  }, 2000);
+});
+
+echoInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') echoBtn.click();
+});
+
+// Character counter feel
+echoInput.addEventListener('input', () => {
+  const len = echoInput.value.length;
+  if (len > 100) {
+    echoInput.style.color = 'rgba(200,119,58,0.8)';
+  } else {
+    echoInput.style.color = '';
+  }
+});
+</script>
+</body>
+</html>
